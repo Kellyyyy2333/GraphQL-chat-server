@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<link
+  href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+  rel="stylesheet"
+  id="bootstrap-css"
+/>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emoji-button@latest/dist/index.min.js"></script>
+<html>
+  <head>
+    <title>Online Chat App</title>
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+
+  <h3 class="text-center">Online chat room</h3>
+  <body>
+    <div class="container messaging">
+      <b>Please login with your name:</b>
+      <input id="nickname" type="text" size="20" />
+      <button id="login">login</button>
+      <b id="notification"></b>
+      <p></p>
+      <div style="background-color: rgb(187, 233, 242);" id="messages"></div>
+      <p></p>
+      <b>Message:</b>
+      <input id="message" type="text" size="75" />
+      <button id="emoji-button">😀</button>
+      <button id="send">Send message</button>
+    </div>
+  </body>
+
+  <script
+    src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"
+  ></script>
+
+  <script>
+    // Retrieving messages'
+    /*import EmojiButton from "emoji-button";*/
+    var nickname = "";
+
+    function getChatroom() {
+      $.post("/api", { query: "{ messages }" }, function (data) {
+        var str = "";
+        for (var message of data.data.messages) {
+          str += `${message}<br />`;
+        }
+
+        $("#messages").html(str);
+      });
+    }
+
+    setInterval(function () {
+      getChatroom();
+    }, 2000);
+
+    // Sending messages
+    function sendMessage(nickname, message) {
+      if (!nickname || nickname == "") {
+        nickname = "Anonymous";
+      }
+
+      $.post(
+        "/api",
+        {
+          query: `mutation { sendMessage(nickname: "${nickname}", message: "${message}")}`,
+        },
+        getChatroom
+      );
+    }
+
+    $("#send").click(function () {
+      /*var nickname = $("#nickname").val();*/
+      var message = $("#message").val();
+      sendMessage(nickname, message);
+      $("#message").val("");
+    });
+
+    $("#login").click(function () {
+      nickname = $("#nickname").val();
+      document.getElementById(
+        "notification"
+      ).innerHTML = `    Hello, ${nickname}😃`;
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const button = document.querySelector("#emoji-button");
+      const picker = new EmojiButton();
+
+      picker.on("emoji", (emoji) => {
+        document.querySelector("#message").value += emoji;
+      });
+
+      button.addEventListener("click", () => {
+        picker.pickerVisible ? picker.hidePicker() : picker.showPicker(button);
+      });
+    });
+  </script>
+</html>
