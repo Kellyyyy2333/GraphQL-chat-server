@@ -12,7 +12,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "emoji-button": "^2.2.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-graphql": "^0.7.1",
     "graphql": "^14.7.0"
   },
